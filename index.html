@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>משחק טריוויה היסטוריה</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f2f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .question {
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            background: white;
+            cursor: pointer;
+            text-align: right;
+        }
+        button.correct { background: #d4edda; }
+        button.wrong { background: #f8d7da; }
+        .feedback {
+            margin: 20px 0;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+        .progress {
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .progress-bar {
+            height: 100%;
+            background: #4CAF50;
+            width: 0;
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>משחק טריוויה היסטוריה</h1>
+        <div id="score">ניקוד: 0</div>
+        <div class="progress">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="game">
+            <button id="start-btn" onclick="initGame()">התחל משחק</button>
+        </div>
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <script>
+    let questions = [];
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+
+    async function loadQuestions() {
+        const response = await window.fs.readFile('questions.txt', { encoding: 'utf8' });
+        questions = JSON.parse(response);
+        return questions;
+    }
+
+    function getRandomQuestions(allQuestions, count) {
+        const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
+        return shuffled.slice(0, count);
+    }
+
+    function updateProgress() {
+        const progressBar = document.getElementById('progress-bar');
+        const width = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
+        progressBar.style.width = width + '%';
+    }
+
+    function showQuestion() {
+        const question = currentQuestions[currentQuestionIndex];
+        const gameDiv = document.getElementById('game');
+        
+        gameDiv.innerHTML = `
+            <div class="question">${question.question}</div>
+            ${question.answers.map((answer, index) => 
+                `<button onclick="checkAnswer(${index})">${answer}</button>`
+            ).join('')}
+        `;
+
+        updateProgress();
+    }
+
+    function checkAnswer(selectedIndex) {
+        const question = currentQuestions[currentQuestionIndex];
+        const buttons = document.querySelectorAll('button');
+        const feedback = document.getElementById('feedback');
+
+        buttons.forEach(btn => btn.disabled = true);
+        
+        const isCorrect = selectedIndex === question.correct;
+        if (isCorrect) score++;
+        
+        buttons[selectedIndex].classList.add(isCorrect ? 'correct' : 'wrong');
+        if (!isCorrect) buttons[question.correct].classList.add('correct');
+
+        document.getElementById('score').textContent = `ניקוד: ${score}`;
+        
+        feedback.textContent = question.explanation;
+        feedback.style.display = 'block';
+
+        setTimeout(() => {
+            feedback.style.display = 'none';
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex < currentQuestions.length) {
+                showQuestion();
+            } else {
+                endGame();
+            }
+        }, 2000);
+    }
+
+    function endGame() {
+        const gameDiv = document.getElementById('game');
+        gameDiv.innerHTML = `
+            <h2>המשחק הסתיים!</h2>
+            <p>הצלחת לענות נכון על ${score} מתוך ${currentQuestions.length} שאלות</p>
+            <button onclick="initGame()">שחק שוב</button>
+        `;
+    }
+
+    async function initGame() {
+        score = 0;
+        currentQuestionIndex = 0;
+        document.getElementById('score').textContent = 'ניקוד: 0';
+        
+        if (questions.length === 0) {
+            questions = await loadQuestions();
+        }
+        
+        currentQuestions = getRandomQuestions(questions, 3);
+        showQuestion();
+    }
+    </script>
+</body>
+</html>
