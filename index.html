@@ -2,69 +2,220 @@
 <html dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>משחק טריוויה</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>משחק טריוויה היסטוריה</title>
     <style>
+        :root {
+            --primary-color: #6366f1;
+            --background-color: #f5f7ff;
+            --success-color: #22c55e;
+            --error-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f0f2f5;
+            font-family: system-ui, -apple-system, sans-serif;
+            background: var(--background-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
+
         .container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .question {
-            font-size: 1.2em;
-            margin-bottom: 20px;
-        }
-        button {
-            display: block;
+            max-width: 600px;
             width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 2px solid #e0e0e0;
-            border-radius: 5px;
+            margin: 0 auto;
+            padding: 1rem;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .card {
             background: white;
-            cursor: pointer;
-            text-align: right;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            flex-grow: 1;
         }
-        button.correct { background: #d4edda; }
-        button.wrong { background: #f8d7da; }
-        .feedback {
-            margin: 20px 0;
-            padding: 10px;
-            border-radius: 5px;
-            display: none;
+
+        .header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 1rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
         }
-        .progress {
-            height: 10px;
-            background: #e0e0e0;
-            border-radius: 5px;
-            margin: 20px 0;
+
+        h1 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
         }
+
+        .score {
+            font-size: 1.25rem;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .progress-container {
+            background: #e2e8f0;
+            border-radius: 9999px;
+            height: 0.5rem;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
         .progress-bar {
             height: 100%;
-            background: #4CAF50;
+            background: var(--primary-color);
             width: 0;
-            transition: width 0.3s;
+            transition: width 0.3s ease;
+        }
+
+        .question {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1a1a1a;
+        }
+
+        .answers {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .answer-button {
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.75rem;
+            background: white;
+            color: #1a1a1a;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: right;
+            display: flex;
+            align-items: center;
+        }
+
+        .answer-button:hover:not([disabled]) {
+            border-color: var(--primary-color);
+            background: #f8fafc;
+        }
+
+        .answer-button.correct {
+            border-color: var(--success-color);
+            background: #f0fdf4;
+        }
+
+        .answer-button.wrong {
+            border-color: var(--error-color);
+            background: #fef2f2;
+        }
+
+        .feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            display: none;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        .feedback.correct {
+            background: #f0fdf4;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .feedback.wrong {
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .start-button, .next-button {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 0.75rem;
+            font-size: 1.1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .start-button:hover, .next-button:hover {
+            background: #4f46e5;
+        }
+
+        .game-over {
+            text-align: center;
+        }
+
+        .game-over h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .game-over p {
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+            color: #666;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 0.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+                border-radius: 0.75rem;
+            }
+
+            .question {
+                font-size: 1.1rem;
+            }
+
+            .answer-button {
+                padding: 0.875rem;
+                font-size: 0.95rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>משחק טריוויה היסטוריה</h1>
-        <div id="score">ניקוד: 0</div>
-        <div class="progress">
-            <div id="progress-bar" class="progress-bar"></div>
+        <div class="header">
+            <h1>משחק טריוויה היסטוריה</h1>
+            <div id="score" class="score">ניקוד: 0</div>
+            <div class="progress-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
         </div>
-        <div id="game">
-            <button id="start-btn" onclick="initGame()">התחל משחק</button>
+        <div class="card">
+            <div id="game">
+                <button id="start-btn" class="start-button" onclick="initGame()">התחל משחק</button>
+            </div>
+            <div id="feedback" class="feedback"></div>
         </div>
-        <div id="feedback" class="feedback"></div>
     </div>
 
     <script>
@@ -92,8 +243,10 @@
 
     function updateProgress() {
         const progressBar = document.getElementById('progress-bar');
-        const width = ((currentQuestionIndex + 1) / currentQuestions.length) * 100;
-        progressBar.style.width = width + '%';
+        const width = currentQuestions.length > 0 
+            ? ((currentQuestionIndex + 1) / currentQuestions.length) * 100 
+            : 0;
+        progressBar.style.width = `${width}%`;
     }
 
     function showQuestion() {
@@ -102,9 +255,13 @@
         
         gameDiv.innerHTML = `
             <div class="question">${question.question}</div>
-            ${question.answers.map((answer, index) => 
-                `<button onclick="checkAnswer(${index})">${answer}</button>`
-            ).join('')}
+            <div class="answers">
+                ${question.answers.map((answer, index) => `
+                    <button class="answer-button" onclick="checkAnswer(${index})">
+                        ${answer}
+                    </button>
+                `).join('')}
+            </div>
         `;
 
         updateProgress();
@@ -112,7 +269,7 @@
 
     function checkAnswer(selectedIndex) {
         const question = currentQuestions[currentQuestionIndex];
-        const buttons = document.querySelectorAll('button');
+        const buttons = document.querySelectorAll('.answer-button');
         const feedback = document.getElementById('feedback');
 
         buttons.forEach(btn => btn.disabled = true);
@@ -126,6 +283,7 @@
         document.getElementById('score').textContent = `ניקוד: ${score}`;
         
         feedback.textContent = question.explanation;
+        feedback.className = `feedback ${isCorrect ? 'correct' : 'wrong'}`;
         feedback.style.display = 'block';
 
         setTimeout(() => {
@@ -143,16 +301,20 @@
     function endGame() {
         const gameDiv = document.getElementById('game');
         gameDiv.innerHTML = `
-            <h2>המשחק הסתיים!</h2>
-            <p>הצלחת לענות נכון על ${score} מתוך ${currentQuestions.length} שאלות</p>
-            <button onclick="initGame()">שחק שוב</button>
+            <div class="game-over">
+                <h2>המשחק הסתיים!</h2>
+                <p>הצלחת לענות נכון על ${score} מתוך ${currentQuestions.length} שאלות</p>
+                <button onclick="initGame()" class="start-button">שחק שוב</button>
+            </div>
         `;
+        document.getElementById('progress-bar').style.width = '100%';
     }
 
     async function initGame() {
         score = 0;
         currentQuestionIndex = 0;
         document.getElementById('score').textContent = 'ניקוד: 0';
+        document.getElementById('progress-bar').style.width = '0%';
         
         if (questions.length === 0) {
             questions = await loadQuestions();
