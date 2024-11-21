@@ -2,7 +2,7 @@
 <html dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>משחק טריוויה היסטוריה</title>
+    <title>משחק טריוויה</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -74,14 +74,20 @@
     let score = 0;
 
     async function loadQuestions() {
-        const response = await window.fs.readFile('questions.txt', { encoding: 'utf8' });
-        questions = JSON.parse(response);
-        return questions;
+        try {
+            const response = await fetch('questions.txt');
+            const text = await response.text();
+            return JSON.parse(text);
+        } catch (error) {
+            console.error('Error loading questions:', error);
+            return [];
+        }
     }
 
     function getRandomQuestions(allQuestions, count) {
-        const shuffled = [...allQuestions].sort(() => 0.5 - Math.random());
-        return shuffled.slice(0, count);
+        return [...allQuestions]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, count);
     }
 
     function updateProgress() {
